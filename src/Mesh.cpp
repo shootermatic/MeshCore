@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
-#define ROTARY_CLK 18
-#define ROTARY_DT  17
+#define ROTARY_CLK 18 // outB
+#define ROTARY_DT  17 // outA
 #define ROTARY_SW  16
 
 const char* cannedMessages[] = {
