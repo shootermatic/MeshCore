@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <Arduino.h>
 
 #define ROTARY_CLK 18 // outB
 #define ROTARY_DT  17 // outA
