@@ -1,80 +1,58 @@
 #include "Mesh.h"
 #include <Arduino.h>
+#include "RotaryInput.h" // Rotary support
 
-#define ROTARY_CLK 18 // outB
-#define ROTARY_DT  17 // outA
-#define ROTARY_SW  16
-
-const char* cannedMessages[] = {
-  "I'm home", "Leaving now", "Help!", "Call me back"
-};
-const int NUM_MESSAGES = sizeof(cannedMessages) / sizeof(cannedMessages[0]);
-
-int currentMessageIndex = 0;
-int lastClkState = HIGH;
-unsigned long lastButtonPress = 0;
+RotaryInput rotary; // Rotary encoder instance
 
 namespace mesh {
 
 void Mesh::begin() {
-  pinMode(ROTARY_CLK, INPUT_PULLUP);
-  pinMode(ROTARY_DT, INPUT_PULLUP);
-  pinMode(ROTARY_SW, INPUT_PULLUP);
-  lastClkState = digitalRead(ROTARY_CLK);
+    // Rotary initialization
+    rotary.setMessages({
+        "I'm home",
+        "I've left",
+        "Help!",
+        "Where are you?",
+        "Call me"
+    });
+    rotary.begin();
 
-  Dispatcher::begin();
+    // Mesh setup continues here (if needed)
 }
 
 void Mesh::loop() {
-  Dispatcher::loop();
+    rotary.loop([](const char* selectedMessage) {
+        Serial.printf("[Rotary] Sending message: %s\n", selectedMessage);
+        // TODO: Replace with actual message sending method
+        // Example: sendGroupMessage(channelId, selectedMessage);
+    });
 
-  int currentClkState = digitalRead(ROTARY_CLK);
-  if (currentClkState != lastClkState && currentClkState == LOW) {
-    int dtState = digitalRead(ROTARY_DT);
-    if (dtState != currentClkState) {
-      currentMessageIndex = (currentMessageIndex + 1) % NUM_MESSAGES;
-    } else {
-      currentMessageIndex = (currentMessageIndex - 1 + NUM_MESSAGES) % NUM_MESSAGES;
-    }
-    Serial.printf("Selected: %s\n", cannedMessages[currentMessageIndex]);
-  }
-  lastClkState = currentClkState;
-
-  if (digitalRead(ROTARY_SW) == LOW && millis() - lastButtonPress > 500) {
-    lastButtonPress = millis();
-    const char* message = cannedMessages[currentMessageIndex];
-
-    Serial.printf("Sending: %s\n", message);
-
-    // TODO: Replace with your MeshCore message send logic
-    // Example (pseudo-code):
-    // sendTextMessage("!abcdef", message);
-  }
+    Dispatcher::loop(); // Existing MeshCore dispatch loop
 }
 
 bool Mesh::allowPacketForward(const mesh::Packet* packet) {
-  return false;  // by default, Transport NOT enabled
+    return false;
 }
 
 uint32_t Mesh::getRetransmitDelay(const mesh::Packet* packet) {
-  uint32_t t = (_radio->getEstAirtimeFor(packet->getRawLength()) * 52 / 50) / 2;
-  return _rng->nextInt(0, 5) * t;
+    uint32_t t = (_radio->getEstAirtimeFor(packet->getRawLength()) * 52 / 50) / 2;
+    return _rng->nextInt(0, 5) * t;
 }
 
 uint32_t Mesh::getDirectRetransmitDelay(const Packet* packet) {
-  return 0;  // by default, no delay
+    return 0;
 }
 
 uint32_t Mesh::getCADFailRetryDelay() const {
-  return _rng->nextInt(1, 4) * 120;
+    return _rng->nextInt(1, 4) * 120;
 }
 
 int Mesh::searchPeersByHash(const uint8_t* hash) {
-  return 0;  // not found
+    return 0;
 }
 
 int Mesh::searchChannelsByHash(const uint8_t* hash, GroupChannel channels[], int max_matches) {
-  return 0;  // not found
+    return 0;
 }
 
 } // namespace mesh
