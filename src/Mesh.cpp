@@ -18,9 +18,9 @@ void Mesh::begin() {
 
 void Mesh::loop() {
       rotary.loop([this](const std::string& msg) {
-        Serial.printf("[Rotary] Sending: %s\n", msg.c_str());
-        this->sendText(msg.c_str());  // Or whatever method you're using
-    });
+          Serial.printf("[Rotary] Sending: %s\n", msg.c_str());
+          this->sendGroupMessage(0, msg.c_str());  // Adjust as needed
+      });
   Dispatcher::loop();
 }
 
