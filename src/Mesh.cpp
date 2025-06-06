@@ -3,8 +3,6 @@
 #include "helpers/RotaryInput.h"
 static RotaryInput rotary;
 
-RotaryInput rotary; // Rotary encoder instance
-
 namespace mesh {
 
 void Mesh::begin() {
