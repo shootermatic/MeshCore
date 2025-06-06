@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include <Arduino.h>
-#include "RotaryInput.h" // Rotary support
+#include "helpers/RotaryInput.h"
+static RotaryInput rotary;
 
 RotaryInput rotary; // Rotary encoder instance
 
