@@ -5,23 +5,38 @@ static RotaryInput rotary;
 
 namespace mesh {
 
+static RotaryInput rotary;
+static String runtimeKey;
+
 void Mesh::begin() {
-      rotary.setMessages({
+    // Set canned messages
+    rotary.setMessages({
         "I'm home",
-        "Leaving now",
+        "I've left",
         "Help!",
-        "Call me back"
+        "Where are you?",
+        "Meet at base".
     });
     rotary.begin();
-  Dispatcher::begin();
+
+    Dispatcher::begin();
 }
 
 void Mesh::loop() {
-      rotary.loop([this](const std::string& msg) {
-          Serial.printf("[Rotary] Sending: %s\n", msg.c_str());
-          Dispatcher::sendText(msg.c_str());
-      });
-  Dispatcher::loop();
+    rotary.loop([](const char* selectedMessage) {
+        if (!runtimeKey.isEmpty()) {
+            Dispatcher::sendText(selectedMessage);
+            Serial.printf("[Rotary] Sent: %s\n", selectedMessage);
+        } else {
+            Serial.println("[Rotary] No runtime channel key set");
+        }
+    });
+
+    Dispatcher::loop();
+}
+
+void Mesh::setChannelKey(const String& key) {
+    runtimeKey = key;
 }
 
 bool Mesh::allowPacketForward(const mesh::Packet* packet) { 
